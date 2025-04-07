@@ -1,25 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
 <svg
-   width="398.31879"
-   height="274.56967"
-   viewBox="0 0 105.38851 72.646561"
+   width="513.28003"
+   height="513.28003"
+   viewBox="0 0 513.28003 513.28003"
    version="1.1"
    id="svg1"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:svg="http://www.w3.org/2000/svg">
   <defs
      id="defs1" />
-  <text
-     xml:space="preserve"
-     style="font-size:101.257px;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#53c68c;fill-opacity:1;stroke-width:1.05476"
-     x="-6.2779331"
-     y="72.70253"
-     id="text1-1"
-     transform="scale(1.0007705,0.9992301)"><tspan
-       id="tspan1-8"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Nimbus Sans Narrow';-inkscape-font-specification:'Nimbus Sans Narrow Bold';letter-spacing:0px;word-spacing:0px;direction:ltr;fill:#53c68c;fill-opacity:1;stroke-width:1.05476"
-       x="-6.2779331"
-       y="72.70253"><tspan
-   style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Nimbus Sans Narrow';-inkscape-font-specification:'Nimbus Sans Narrow Bold';letter-spacing:0px;word-spacing:0px;direction:ltr;fill:#ff7f2a;fill-opacity:1"
-   id="tspan3"
-   dx="0">E</tspan>R</tspan></text>
+  <g
+     id="layer1"
+     transform="translate(-0.55999756,0.56002808)">
+    <circle
+       style="fill:#1c1c24;fill-opacity:1;stroke-width:1.06507"
+       id="path3"
+       cx="257.20001"
+       cy="256.07999"
+       r="256.64001" />
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:318.815px;font-family:'Nimbus Sans Narrow';-inkscape-font-specification:'Nimbus Sans Narrow Bold';text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#ff7f2a;stroke-width:3.32097"
+       x="255.11169"
+       y="371.05283"
+       id="text1"><tspan
+         id="tspan1"
+         x="255.11168"
+         y="371.05283"
+         style="stroke-width:3.32097">E<tspan
+   style="fill:#53c68c;fill-opacity:1;stroke-width:3.32097"
+   id="tspan2">R</tspan></tspan></text>
+  </g>
 </svg>
