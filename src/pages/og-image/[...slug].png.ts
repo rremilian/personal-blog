@@ -37,7 +37,7 @@ const markup = (title: string, pubDate: string) =>
 		<div tw="flex items-center justify-between w-full p-10 border-t border-[#2bbc89] text-xl">
 			<div tw="flex items-center">
 			</div>
-			<p>by ${siteConfig.author}</p>
+			<p>by Emilian R.</p>
 		</div>
 	</div>`;
 
