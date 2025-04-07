@@ -1,0 +1,50 @@
+---
+import PageLayout from "@/layouts/Base.astro";
+import { Icon } from "astro-icon/components";
+
+
+const meta = {
+	description: "Contact page",
+	title: "Contact",
+};
+
+const socialLinks: {
+	friendlyName: string;
+	isWebmention?: boolean;
+	link: string;
+	name: string;
+}[] = [
+	{
+		friendlyName: "LinkedIn",
+		link: "https://linkedin.com/in/rremilian",
+		name: "mdi:linkedin",
+	},
+];
+---
+
+<PageLayout meta={meta}>
+	<h1 class="title mb-6">Contact</h1>
+	<div class="prose prose-base prose-cactus max-w-none">
+    <p>Feel free to reach out to me via email at <a href="mailto:contact@emilianrosca.com"><span style="color: var(--color-accent);">contact@emilianrosca.com</span></a>.</p>
+	</div>
+    <div class="flex flex-wrap items-end gap-x-2">
+        <p>You can also find me on</p>
+        <ul class="flex flex-1 items-center gap-x-2 sm:flex-initial">
+            {
+                socialLinks.map(({ friendlyName, isWebmention, link, name }) => (
+                    <li class="flex">
+                        <a
+                            class="hover:text-link inline-block"
+                            href={link}
+                            rel={`noreferrer ${isWebmention ? "me authn" : ""}`}
+                            target="_blank"
+                        >
+                            <Icon aria-hidden="true" class="h-8 w-8" focusable="false" name={name} />
+                            <span class="sr-only">{friendlyName}</span>
+                        </a>
+                    </li>
+                ))
+            }
+        </ul>
+    </div>
+</PageLayout>
