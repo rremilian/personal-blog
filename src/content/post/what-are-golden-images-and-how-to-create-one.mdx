@@ -1,0 +1,128 @@
+---
+title: "What are Golden Images and how to create one?"
+description: "Let’s explore what Golden Images are and why you should be using them in your infrastructure."
+publishDate: "01 May 2025"
+tags: ["devops", "packer", "cloud", "virtualization"]
+---
+
+## Introduction
+
+I will assume that many of you have installed an operating system (OS) at least once in your life. You know the process: make a bootable USB or DVD, boot from it, follow an installation wizard, wait for a few minutes, and *voilà* your OS is installed and ready for action. The process is similar if you want to install the OS on a virtual machine (VM). The main difference is that you don't need a bootable USB or DVD, you just need an ISO image with the OS.
+
+Now, let's consider this scenario: you want to create multiple virtual machines in your infrastructure and you want to do it in a timely manner. Would the approach described above work ? Well, first of all, you will have to create the VMs and this will take some time if you do it manually. But let's suppose that you already have the VMs, but they don't have an OS installed. If you were to install the OS on each VM manually, it will take **a very long time**. Moreover, this process is prone to human error and we would like to avoid that. Even if you manage to somehow automate the installation process, it will still take some time for the OS to be installed. We want to be fast and here is where Golden Images can help us.
+
+In this post I will cover the topic of Golden Images and why you should use them in your infrastructure. Also, I will show you how to create a Golden Image yourself using Packer and Virtualbox.
+
+## Golden Images
+
+A Golden Image is a pre-configured snapshot of a system, which can be used to deploy new instances. You might find this concept under different names, such as *master image*, *clone image* or *base image*. They are all the same, so don't be confused. 
+
+Going back to our previous example, let's suppose that we have successfully installed and configured one VM. We can now take a snapshot of this VM and start using it as a Golden Image. After this operation is done, if you need to deploy multiple VMs, you can just clone the Golden Image over and over again. Doing so will be fast and you will be sure that the configuration is the same on all of the VMs.
+
+## Benefits of using Golden Images
+
+* **Consistency:** When you have to maintain an infrastructure, you want to have consistency over the components which make it up. You may ask why and the answer is because it makes things much easier in the long run. If every VM is built from the same Golden Image, troubleshooting becomes much simpler. You know that all VMs have the same setup, the same services, the same applications installed, and thus you can more quickly narrow down where things went wrong.
+
+* **Scalability:** Using a Golden Image allows us to quickly create new instances which share the same configuration. If you have 5 VMs and you need 10, you just make 5 clones of the Golden Image.
+
+* **Time-effectiveness:** Configuring each VM from scratch takes a lot of time. A Golden Image drastically reduces the time required to deploy a new VM to your infrastructure.
+
+## How to create a Golden Image?
+
+Since a Golden Image is essentially a pre-configured VM, the easiest way to create one is by setting up a VM and applying your desired configuration. Once it's ready, you can clone it whenever needed. However, it's a best practice to implement versioning to keep track of the changes made to the base image and this approach will not allow us to do that. We would like to have the entire Golden Image configuration defined as code, in a file or in multiple files. This way, we can version the configuration by storing it in a Git repository. Fortunately, there's a tool that allows us to automate the Golden Image creation process from a single source configuration.
+
+In this section, I will show you how to create a Golden Image using [Packer](https://www.packer.io/), a tool for automating image builds. As the hypervisor, I will use QEMU, but you are not limited to just [QEMU](https://www.qemu.org/). Packer has multiple integrations available. You can find a list of them [here](https://developer.hashicorp.com/packer/integrations).
+
+:::note
+All the following steps were done on Fedora 41. For other operating systems, please check [Packer documentation](https://developer.hashicorp.com/packer/install?product_intent=packer).
+:::
+
+**1. Install Packer**
+
+We have 2 options: we can either add the HashiCorp official repository and install Packer from there or we can download the Packer binary directly. I will go with the first option:
+
+```bash
+sudo dnf config-manager addrepo --from-repofile=https://rpm.releases.hashicorp.com/fedora/hashicorp.repo
+sudo dnf -y install packer
+```
+
+After this, Packer should be available on your system. You can check by running `packer version`:
+
+```bash
+packer version
+
+Packer v1.12.0
+```
+
+**2. Initialize Packer**
+
+As mentioned earlier, Packer has multiple integrations available. Considering this, we will have to specify which integration we would like to use. For this, we will have to create a `.pkr.hcl` file (`hcl` is coming from HashiCorp configuration language). We will name this initialization file `packer.pkr.hcl`. In my case, this file will look like this:
+
+```hcl title=packer.pkr.hcl
+packer {
+  required_plugins {
+    qemu = {
+      version = "~> 1"
+      source  = "github.com/hashicorp/qemu"
+    }
+  }
+}
+```
+
+The file specifies that we need the `qemu` plugin from `github.com/hashicorp/qemu`. Regarding the version, the `~>` is known as the pessimistic operator and, in our case, it's used to allow updates that don't change the left-most non-zero digit. `~> 1` means that we will get a version of `qemu` between the range `>= 1.0.0` and `< 2.0.0`.
+
+We can now run `packer init` to download and install the plugin:
+
+```bash
+packer init
+
+Installed plugin github.com/hashicorp/qemu v1.1.1 in "/home/user/.config/packer/plugins/github.com/hashicorp/qemu/packer-plugin-qemu_v1.1.1_x5.0_linux_amd64"
+```
+
+**3. Define Golden Image configuration**
+
+Similar to how we specified the plugin we want to use, the Golden Image configuration will also be specified in a `.pkr.hcl` file. The configuration options might differ slightly from plugin to plugin, but you can find all the information you need in your integration's documentation page. 
+
+For this tutorial, I will use Rocky 9 Minimal as my starting point and I will define a Golden Image with 2 virtual CPUs, 4 GB of RAM and 50 GB of storage:
+
+```hcl rocky.pkr.hcl
+source "qemu" "example" {
+  iso_url           = "https://download.rockylinux.org/pub/rocky/9/isos/x86_64/Rocky-9.5-x86_64-minimal.iso"
+  iso_checksum      = "sha256:eedbdc2875c32c7f00e70fc861edef48587c7cbfd106885af80bdf434543820b"
+  cpu_model         = "host"
+  cpus              = 2
+  memory            = 4096
+  vm_name           = "rocky_golden"
+  disk_size         = "20000M"
+  format            = "qcow2"
+  ssh_username      = "gold"
+  ssh_password      = "strong_strong_password"
+  ssh_timeout       = "20m"
+  output_directory  = "rocky_golden_image"
+  shutdown_command  = "echo 'The Golden Image has been generated successfully.' | sudo -S shutdown -P now"
+  net_device        = "virtio-net"
+  disk_interface    = "virtio"
+  boot_wait         = "10s"
+}
+
+build {
+  sources = ["source.qemu.example"]
+}
+```
+
+If we will try to build the image right now using `packer build .`, we will notice that the VM will be created, but the installation process will not start automatically. To enable an unattended installation, we need to include a kickstart file. This is a plain text file that defines the configuration details for the installation process. You can see an example [here](https://gist.github.com/rremilian/7e330ffc92872d1f7b411b935f25611a).
+
+You can pass this kickstart file to the VM via a HTTP server or via an ISO file (both options are provided by Packer). For this tutorial, I will go with the first option. You will have to download the kickstart file and add these lines to the `rocky.pkr.hcl` file:
+
+```hcl
+http_directory    = "http"  #The relative path to the folder where rocky.ks.cfg is located
+boot_command      = ["<tab> text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/rocky.ks.cfg<enter><wait>"]
+```
+
+You can now run `packer build .` to create your Golden Image. After the installation process is done, you will find your disk image inside the output directory. You can import this disk image in `virt-manager` and clone it as many times as you need.
+
+## Final thoughts
+
+As you have seen, creating a Golden Image is a straightforward process that can significantly streamline your infrastructure management. However, even if the process is quite simple, it's essential to review the documentation of the specific integration you are working with.
+
+If you're planning to use Packer on Azure or AWS, you should know that the process remains similar. Keep in mind though, that you won't be able to use custom ISO files. Instead, you will have to work with pre-existing images from the marketplace.
