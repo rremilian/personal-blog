@@ -1,0 +1,13 @@
+---
+title: "Networking limitations when connecting Hetzner dedicated servers to Hetzner Cloud"
+description: "Limitations and considerations when connecting Hetzner dedicated servers to Hetzner Cloud."
+publishDate: "05 Jul 2025"
+---
+
+Recently, I attempted to connect a Hetzner dedicated server to a private network from Hetzner Cloud. In case you don't know, Hetzner provides the ability to do this with a vSwitch. The process is pretty straightforward and [well-documented](https://docs.hetzner.com/cloud/networks/connect-dedi-vswitch/). However, there are some essential things to consider:
+
+1. **Traffic routing through Hetzner gateway**: In Hetzner Cloud, all network traffic is required to pass through the Hetzner gateway. This is enforced on virtual machines by limiting the network configuration to only the VM’s private IP address. Essentially, the VM is aware of its own IP and nothing else. If you run `ip a` on the VM, you'll see a `/32` subnet mask. Given this restriction, can you route network traffic through a router?
+
+    The answer is yes. You can accomplish this by adding a route via the web interface. Direct routing from the VM itself is not possible since we have a `/32` subnet. After the route is applied, the traffic will follow this flow: **VM → Hetzner Gateway → Router VM → Out**.
+
+2. **Routing limitation**: Routing is restricted within the Hetzner Cloud environment. Due to this limitation, you cannot route traffic from a Hetzner Cloud VM to a router that resides on a dedicated server (even if both are connected via a vSwitch).
